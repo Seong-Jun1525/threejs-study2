@@ -6,6 +6,8 @@
     <title>Document</title>
 
     <script type="text/javascript" src="../libs/three.js"></script>
+
+    <!-- 애니메이션의 프레임 속도 정보 제공. 초당 프레임 수를 작은 그래프로 보여주는 라이브러리 -->
     <script type="text/javascript" src="../libs/stats.js"></script>
     <script type="text/javascript" src="../libs/dat.gui.js"></script>
 
@@ -16,8 +18,11 @@
     </style>
 </head>
 <body>
+    <!-- 통계치 그래프 출력 -->
+    <div id="Stats-output"></div>
+    
     <div id="WebGL-output"></div>
 
-    <script type="text/javascript" src="./main.js"></script>
+    <script type="text/javascript" src="./js/main.js"></script>
 </body>
 </html>

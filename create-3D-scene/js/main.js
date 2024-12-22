@@ -1,13 +1,18 @@
 function init() {
+    const stats = new initStats();
+
     /** Scene 객체
      * 렌더링할 모든 객체와 사용할 모든 광원을 저장하는데 쓰이는 컨테이너
      *  */
-    var scene = new THREE.Scene();
+    const scene = new THREE.Scene();
+
+    // sphere 바운싱
+    let step = 0;
 
     /** 카메라 정의
      * 장면을 렌더링 했을 때 어떻게 보여질 것인지 정의
      *  */
-    var camera = new THREE.PerspectiveCamera(
+    const camera = new THREE.PerspectiveCamera(
         45, // fov
         window.innerWidth / window.innerHeight, // aspect 
         0.1, // near
@@ -15,7 +20,7 @@ function init() {
     );
 
     // 보조 축 추가
-    // var axes = new THREE.AxesHelper(50);
+    // const axes = new THREE.AxesHelper(50);
     // scene.add(axes);
 
     /** renderer 정의
@@ -28,7 +33,7 @@ function init() {
      * Three.js 기본 설정으로 비활성화되어 있음
      * 그래서 활성화 해주는 작업을 해야함
      */
-    var renderer = new THREE.WebGLRenderer();
+    const renderer = new THREE.WebGLRenderer();
     renderer.setClearColor(new THREE.Color(0xEEEEEE, 1.0));
     renderer.setSize(window.innerWidth, window.innerHeight);
 
@@ -45,10 +50,10 @@ function init() {
      * 이후 결합된 Mesh의 변수명으로 위치 등을 설정
      */
 
-    var planeGeometry = new THREE.PlaneGeometry(60, 20); // 폭: 60, 높이: 20
-    // var planeMaterial = new THREE.MeshBasicMaterial({ color: 0xcccccc });
-    var planeMaterial = new THREE.MeshLambertMaterial({ color: 0xCCCCCC });
-    var plane = new THREE.Mesh(planeGeometry, planeMaterial);
+    const planeGeometry = new THREE.PlaneGeometry(60, 20); // 폭: 60, 높이: 20
+    // const planeMaterial = new THREE.MeshBasicMaterial({ color: 0xcccccc });
+    const planeMaterial = new THREE.MeshLambertMaterial({ color: 0xCCCCCC });
+    const plane = new THREE.Mesh(planeGeometry, planeMaterial);
     plane.receiveShadow = true; // 그림자 설정
 
     plane.rotation.x = -0.5 * Math.PI;
@@ -58,10 +63,10 @@ function init() {
 
     scene.add(plane);
 
-    var cubeGeometry = new THREE.BoxGeometry(4, 4, 4);
-    // var cubeMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true });
-    var cubeMaterial = new THREE.MeshLambertMaterial({ color: 0xFFFF00 });
-    var cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+    const cubeGeometry = new THREE.BoxGeometry(4, 4, 4);
+    // const cubeMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true });
+    const cubeMaterial = new THREE.MeshLambertMaterial({ color: 0xFFFF00 });
+    const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
     cube.castShadow = true; // 그림자 설정
 
     cube.position.x = -4;
@@ -70,10 +75,10 @@ function init() {
 
     scene.add(cube);
 
-    var sphereGeometry = new THREE.SphereGeometry(4, 20, 20);
-    // var sphereMaterial = new THREE.MeshBasicMaterial({ color: 0x7777FF, wireframe: true });
-    var sphereMaterial = new THREE.MeshLambertMaterial({ color: 0x7777FF });
-    var sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+    const sphereGeometry = new THREE.SphereGeometry(4, 20, 20);
+    // const sphereMaterial = new THREE.MeshBasicMaterial({ color: 0x7777FF, wireframe: true });
+    const sphereMaterial = new THREE.MeshLambertMaterial({ color: 0x7777FF });
+    const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
     sphere.castShadow = true; // 그림자 설정
 
     sphere.position.x = 20;
@@ -92,7 +97,7 @@ function init() {
      * 광원을 추가해도 물질을 변경하지 않으면 아무런 변화가 없음
      * 빛의 영향을 받지 않는 MeshBasicMaterial에서 빛의 영향을 받는 것으로 변환해야함
     */
-    var spotLight = new THREE.SpotLight(0xFF0000);
+    const spotLight = new THREE.SpotLight(0xFF0000);
 
     // 그림자가 어느 광원에서 그릴지 정의해줘야해서 다음 코드 추가
     spotLight.position.set(-40, 60, -10);
@@ -107,7 +112,36 @@ function init() {
     // scene.add(ambientLight);
 
     document.getElementById("WebGL-output").appendChild(renderer.domElement);
-    renderer.render(scene, camera);
+
+    renderScene();
+
+    function initStats() {
+        // 통계치 초기화 함수
+        let stats = new Stats();
+        stats.setMode(0); // 0: 초당 프레임 수(fps) 측정, 1: 렌더링 시간 측정
+        stats.domElement.style.position = "absolute";
+        stats.domElement.style.left = "0px";
+        stats.domElement.style.top = "0px";
+        document.getElementById("Stats-output").appendChild(stats.domElement);
+
+        return stats;
+    };
+
+    // 렌더링
+    function renderScene() {
+        stats.update();
+
+        cube.rotation.x += 0.02;
+        cube.rotation.y += 0.02;
+        cube.rotation.z += 0.02;
+
+        step += 0.04; // 바운싱 속도도
+        sphere.position.x = 20 + (10 * (Math.cos(step)));
+        sphere.position.y = 2 + (10 * Math.abs(Math.sin(step)));
+
+        requestAnimationFrame(renderScene);
+        renderer.render(scene, camera);
+    };
 };
 
 window.onload = init;
