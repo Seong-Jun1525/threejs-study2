@@ -1,18 +1,29 @@
+let camera;
+let scene;
+let renderer;
+
 function init() {
     const stats = new initStats();
 
     /** Scene 객체
      * 렌더링할 모든 객체와 사용할 모든 광원을 저장하는데 쓰이는 컨테이너
      *  */
-    const scene = new THREE.Scene();
+    scene = new THREE.Scene();
 
     // sphere 바운싱
     let step = 0;
 
+    const controls = new function () {
+        this.rotationSpeed = 0.02;
+        this.bouncingSpeed = 0.03;
+    }
+
+    const gui = new dat.GUI();
+
     /** 카메라 정의
      * 장면을 렌더링 했을 때 어떻게 보여질 것인지 정의
      *  */
-    const camera = new THREE.PerspectiveCamera(
+    camera = new THREE.PerspectiveCamera(
         45, // fov
         window.innerWidth / window.innerHeight, // aspect 
         0.1, // near
@@ -33,7 +44,7 @@ function init() {
      * Three.js 기본 설정으로 비활성화되어 있음
      * 그래서 활성화 해주는 작업을 해야함
      */
-    const renderer = new THREE.WebGLRenderer();
+    renderer = new THREE.WebGLRenderer();
     renderer.setClearColor(new THREE.Color(0xEEEEEE, 1.0));
     renderer.setSize(window.innerWidth, window.innerHeight);
 
@@ -113,7 +124,26 @@ function init() {
 
     document.getElementById("WebGL-output").appendChild(renderer.domElement);
 
+    gui.add(controls, "rotationSpeed", 0, 0.5);
+    gui.add(controls, "bouncingSpeed", 0, 0.5);
+
     renderScene();
+
+    // 렌더링
+    function renderScene() {
+        stats.update();
+
+        cube.rotation.x += 0.02;
+        cube.rotation.y += 0.02;
+        cube.rotation.z += 0.02;
+
+        step += controls.bouncingSpeed; // 바운싱 속도
+        sphere.position.x = 20 + (10 * (Math.cos(step)));
+        sphere.position.y = 2 + (10 * Math.abs(Math.sin(step)));
+
+        requestAnimationFrame(renderScene);
+        renderer.render(scene, camera);
+    };
 
     function initStats() {
         // 통계치 초기화 함수
@@ -126,22 +156,15 @@ function init() {
 
         return stats;
     };
-
-    // 렌더링
-    function renderScene() {
-        stats.update();
-
-        cube.rotation.x += 0.02;
-        cube.rotation.y += 0.02;
-        cube.rotation.z += 0.02;
-
-        step += 0.04; // 바운싱 속도도
-        sphere.position.x = 20 + (10 * (Math.cos(step)));
-        sphere.position.y = 2 + (10 * Math.abs(Math.sin(step)));
-
-        requestAnimationFrame(renderScene);
-        renderer.render(scene, camera);
-    };
 };
 
+function onResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+
+    renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
 window.onload = init;
+
+window.addEventListener('resize', onResize, false);
